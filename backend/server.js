@@ -4,13 +4,15 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const pool = require("./config/db"); // Establishes database connection pool
+const pool = require("./config/db");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
 // 2. Global Middlewares
 app.use(cors());          // Allows our frontend to communicate with this API
 app.use(express.json());  // Allows our server to read JSON bodies sent by the user
+app.use("/api/auth", authRoutes);
 app.use(morgan("dev"));   // Request Logging middleware (Satisfies course requirements)
 
 // 3. Simple Testing Route (Health Check)
