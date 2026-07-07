@@ -1,30 +1,27 @@
 const UserModel = require("../models/userModel");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const AuthController = {
+  // --- REGISTRATION ---
   register: async (req, res) => {
     try {
       const { name, email, password, role } = req.body;
 
-      // 1. Simple validation
       if (!name || !email || !password) {
         return res.status(400).json({ message: "All fields are required" });
       }
 
-      // 2. Check if user already exists
       const existingUser = await UserModel.findByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: "Email is already registered" });
       }
 
-      // 3. Hash the password securely (10 salt rounds)
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      // 4. Save user to database via the Model
       const newUser = await UserModel.create(name, email, hashedPassword, role);
 
-      // 5. Send back success response
       res.status(201).json({
         message: "User registered successfully!",
         user: newUser
@@ -32,6 +29,52 @@ const AuthController = {
     } catch (error) {
       console.error("Registration Error:", error);
       res.status(500).json({ message: "Server error during registration" });
+    }
+  },
+
+  // --- LOGIN ---
+  login: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      // 1. Validation
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      // 2. Check if user exists
+      const user = await UserModel.findByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // 3. Compare entered password with the hashed password in DB
+      const isMatch = await bcrypt.compare(password, user.password_hash);
+      if (!isMatch) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // 4. Generate JWT Token (Expires in 2 hours)
+      const token = jwt.sign(
+        { id: user.id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "2h" }
+      );
+
+      // 5. Respond with success and token
+      res.status(200).json({
+        message: "Login successful!",
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error("Login Error:", error);
+      res.status(500).json({ message: "Server error during login" });
     }
   }
 };
