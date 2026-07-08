@@ -9,7 +9,9 @@ const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const borrowRoutes = require("./routes/borrowRoutes");
 
+
 const app = express();
+app.use(cors());
 
 // 2. Global Middlewares
 app.use(cors());          // Allows our frontend to communicate with this API
