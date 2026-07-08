@@ -1,14 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const BookController = require("../controllers/bookController");
-const { verifyToken, isAdmin } = require("../middleware/authMiddleware");
+const verifyToken = require("../middleware/authMiddleware"); // Import our guard!
 
-// Public route: Anyone can see available books
-router.get("/", BookController.getAllBooks);
+// Endpoint to get all books (Now protected!)
+router.get("/", verifyToken, BookController.getBooks);
 
-// Protected Admin routes: Must be logged in AND an admin to perform CRUD modifications
-router.post("/", verifyToken, isAdmin, BookController.createBook);
-router.put("/:id", verifyToken, isAdmin, BookController.updateBook);
-router.delete("/:id", verifyToken, isAdmin, BookController.deleteBook);
+// Endpoint to add a book (Now protected!)
+router.post("/", verifyToken, BookController.addBook);
 
 module.exports = router;

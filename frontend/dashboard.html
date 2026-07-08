@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library App - Dashboard</title>
+</head>
+<body>
+    <h2>Library Book Collection</h2>
+    
+    <h3>Add a New Book</h3>
+    <form id="addBookForm">
+        <input type="text" id="title" placeholder="Book Title" required><br><br>
+        <input type="text" id="author" placeholder="Author Name" required><br><br>
+        <input type="text" id="isbn" placeholder="ISBN (Optional)"><br><br>
+        <button type="submit">Add Book</button>
+    </form>
+    <p id="formMessage" style="color: green;"></p>
+
+    <hr>
+
+    <h3>Available Books</h3>
+    <button onclick="fetchBooks()">Refresh Book List</button>
+    <ul id="bookList"></ul>
+
+    <script>
+        // Retrieve the stored token from localStorage
+        const token = localStorage.getItem('token');
+
+        // Safety Check: Redirect back to login if no token exists
+        if (!token) {
+            alert("Access Denied! Please login first.");
+            window.location.href = 'login.html';
+        }
+
+        // 1. Fetch books (Sending the Token)
+        async function fetchBooks() {
+            try {
+                const response = await fetch('http://localhost:5000/api/books', {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${token}` // Passes the JWT to middleware!
+                    }
+                });
+                
+                const books = await response.json();
+                const bookList = document.getElementById('bookList');
+                bookList.innerHTML = ''; 
+
+                if (books.length === 0) {
+                    bookList.innerHTML = '<li>No books available in the library yet.</li>';
+                    return;
+                }
+
+                books.forEach(book => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${book.title}</strong> by ${book.author} (ISBN: ${book.isbn || 'N/A'})`;
+                    bookList.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Error fetching books:", error);
+            }
+        }
+
+        // 2. Add a new book (Sending the Token)
+        document.getElementById('addBookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const isbn = document.getElementById('isbn').value;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/books', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Passes the JWT here too!
+                    },
+                    body: JSON.stringify({ title, author, isbn })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('formMessage').style.color = "green";
+                    document.getElementById('formMessage').innerText = "Book added successfully!";
+                    document.getElementById('addBookForm').reset();
+                    fetchBooks(); 
+                } else {
+                    document.getElementById('formMessage').style.color = "red";
+                    document.getElementById('formMessage').innerText = data.message;
+                }
+            } catch (error) {
+                document.getElementById('formMessage').style.color = "red";
+                document.getElementById('formMessage').innerText = "Error connecting to server.";
+            }
+        });
+
+        // Load books on entry
+        fetchBooks();
+    </script>
+</body>
+</html>

@@ -1,56 +1,35 @@
 const BookModel = require("../models/bookModel");
 
 const BookController = {
-  createBook: async (req, res) => {
+  // 1. Fetch all books from the database
+  getBooks: async (req, res) => {
     try {
-      const { title, author, isbn, genre, available_copies } = req.body;
-      if (!title || !author || !isbn) {
-        return res.status(400).json({ message: "Title, author, and ISBN are required." });
-      }
-      const newBook = await BookModel.create(title, author, isbn, genre, available_copies || 1);
-      res.status(201).json({ message: "Book added successfully!", book: newBook });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error while adding book." });
-    }
-  },
-
-  getAllBooks: async (req, res) => {
-    try {
-      const books = await BookModel.findAll();
+      const books = await BookModel.getAll();
       res.status(200).json(books);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error while fetching books." });
+      console.error("Fetch Books Error:", error);
+      res.status(500).json({ message: "Server error while fetching books" });
     }
   },
 
-  updateBook: async (req, res) => {
+  // 2. Add a new book to the database
+  addBook: async (req, res) => {
     try {
-      const { id } = req.params;
-      const { title, author, isbn, genre, available_copies } = req.body;
-      const updatedBook = await BookModel.update(id, title, author, isbn, genre, available_copies);
-      if (!updatedBook) {
-        return res.status(404).json({ message: "Book not found." });
-      }
-      res.status(200).json({ message: "Book updated successfully!", book: updatedBook });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error while updating book." });
-    }
-  },
+      const { title, author, isbn } = req.body;
 
-  deleteBook: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const deletedBook = await BookModel.delete(id);
-      if (!deletedBook) {
-        return res.status(404).json({ message: "Book not found." });
+      // Simple Validation
+      if (!title || !author) {
+        return res.status(400).json({ message: "Title and Author are required" });
       }
-      res.status(200).json({ message: "Book deleted successfully!" });
+
+      const newBook = await BookModel.create(title, author, isbn);
+      res.status(201).json({
+        message: "Book added successfully!",
+        book: newBook
+      });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error while deleting book." });
+      console.error("Add Book Error:", error);
+      res.status(500).json({ message: "Server error while adding book" });
     }
   }
 };

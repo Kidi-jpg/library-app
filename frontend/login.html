@@ -31,9 +31,12 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // Save the JWT token into browser storage so we can use it later!
+                    // Save the JWT token into browser storage
                     localStorage.setItem('token', data.token);
-                    document.getElementById('message').innerText = "Login successful! Token saved.";
+                    document.getElementById('message').innerText = "Login successful! Redirecting...";
+                    
+                    // --- THE REDIRECT ROUTE IS NOW LOADED RIGHT HERE ---
+                    window.location.href = 'dashboard.html';
                 } else {
                     document.getElementById('message').innerText = data.message;
                 }
