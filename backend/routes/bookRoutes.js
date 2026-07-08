@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const BookController = require("../controllers/bookController");
-const verifyToken = require("../middleware/authMiddleware"); // Import our guard!
+const verifyToken = require("../middleware/authMiddleware");
 
-// Endpoint to get all books (Now protected!)
+// Secure Endpoints
 router.get("/", verifyToken, BookController.getBooks);
-
-// Endpoint to add a book (Now protected!)
 router.post("/", verifyToken, BookController.addBook);
+router.delete("/:id", verifyToken, BookController.deleteBook); // Dynamic parameter ':id'
 
 module.exports = router;

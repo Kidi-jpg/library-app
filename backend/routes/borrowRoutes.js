@@ -1,11 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const BorrowController = require("../controllers/borrowController");
-const { verifyToken } = require("../middleware/authMiddleware");
+const verifyToken = require("../middleware/authMiddleware");
 
-// All borrowing actions require a valid login token
-router.post("/checkout", verifyToken, BorrowController.borrowBook);
-router.post("/return", verifyToken, BorrowController.returnBook);
-router.get("/history", verifyToken, BorrowController.getMyBorrowings);
+// Temporary inline placeholders to prevent the controller crash!
+router.post("/checkout", verifyToken, (req, res) => {
+    res.json({ message: "Book checkout placeholder working!" });
+});
+
+router.post("/return", verifyToken, (req, res) => {
+    res.json({ message: "Book return placeholder working!" });
+});
+
+router.get("/history", verifyToken, (req, res) => {
+    res.json({ message: "Borrowing history placeholder working!" });
+});
 
 module.exports = router;

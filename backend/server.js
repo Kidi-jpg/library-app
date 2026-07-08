@@ -14,6 +14,11 @@ const app = express();
 app.use(cors());
 
 // 2. Global Middlewares
+// Global Application Logger Middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} request made to: ${req.url}`);
+    next();
+});
 app.use(cors());          // Allows our frontend to communicate with this API
 app.use(express.json());  // Allows our server to read JSON bodies sent by the user
 app.use("/api/auth", authRoutes);
